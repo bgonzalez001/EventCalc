@@ -1,0 +1,5 @@
+{
+  "name": "Event Budget Planner AI",
+  "description": "An intelligent application to manage and calculate costs and margins for multiple events, providing AI-powered advice for financial optimization.",
+  "requestFramePermissions": []
+}

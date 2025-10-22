@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const Header: React.FC = () => {
@@ -9,7 +8,7 @@ const Header: React.FC = () => {
           Planificador de Eventos IA
         </h1>
         <p className="text-gray-400 mt-1">
-          Gestiona los presupuestos de "Los Ríos Atrae" y "Ruedalab IA" (7-8 Enero, 2026)
+          Gestiona tus presupuestos, costos y tareas con la ayuda de la IA.
         </p>
       </div>
     </header>

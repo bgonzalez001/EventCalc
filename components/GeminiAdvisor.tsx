@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import type { EventData, CostItem } from '../types';
 import { getAiAdvice } from '../services/geminiService';
@@ -21,10 +20,13 @@ const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ events, sharedCosts }) =>
   const [isLoading, setIsLoading] = useState(false);
 
   const buildPrompt = () => {
+    if (events.length === 0) {
+        return "Eres un asesor experto en producción de eventos. El usuario aún no ha creado ningún evento. Anímale a crear su primer evento para poder empezar a planificar y usar tus servicios de asesoría."
+    }
     const sharedCostsTotal = sharedCosts.reduce((sum, item) => sum + item.amount, 0);
     const sharedCostPerEvent = sharedCostsTotal / events.length;
 
-    let context = `Eres un asesor experto en producción de eventos. Estoy planificando dos eventos hermanos: "Los Ríos Atrae" y "Ruedalab IA". Aquí está el resumen financiero actual:\n\n`;
+    let context = `Eres un asesor experto en producción de eventos. Estoy planificando ${events.length} evento(s). Aquí está el resumen financiero actual:\n\n`;
 
     events.forEach(event => {
       const ownCostsTotal = event.costItems.reduce((sum, item) => sum + item.amount, 0);
@@ -37,15 +39,15 @@ const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ events, sharedCosts }) =>
       context += `- Presupuesto Disponible: ${currencyFormatter.format(remainingBudget)}\n\n`;
     });
     
-    context += `Costos compartidos entre ambos eventos suman: ${currencyFormatter.format(sharedCostsTotal)}\n\n`;
-    context += `Mi pregunta es: "${question}".\n\n`;
+    context += `Costos compartidos entre todos los eventos suman: ${currencyFormatter.format(sharedCostsTotal)}\n\n`;
+    context += `Mi pregunta es: "${question || 'Dame un consejo general sobre cómo optimizar mis presupuestos.'}".\n\n`;
     context += `Por favor, dame tu consejo de forma clara, concisa y orientada a la acción. Usa markdown para formatear tu respuesta.`;
 
     return context;
   };
 
   const handleGetAdvice = async () => {
-    if (!question.trim() || isLoading) return;
+    if (isLoading) return;
     setIsLoading(true);
     setAdvice('');
     const prompt = buildPrompt();
@@ -72,13 +74,13 @@ const GeminiAdvisor: React.FC<GeminiAdvisorProps> = ({ events, sharedCosts }) =>
           type="text"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Ej: ¿Cómo puedo reducir costos en catering?"
-          className="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
-          disabled={isLoading}
+          placeholder={events.length === 0 ? "Crea un evento para usar el asesor" : "Ej: ¿Cómo puedo reducir costos en catering?"}
+          className="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:cursor-not-allowed disabled:bg-gray-700/50"
+          disabled={isLoading || events.length === 0}
         />
         <button 
           onClick={handleGetAdvice}
-          disabled={isLoading}
+          disabled={isLoading || events.length === 0}
           className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center min-w-[150px]"
         >
           {isLoading ? (

@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import type { EventData, CostItem, Task } from '../types';
 import { DownloadIcon, UploadIcon } from './icons';
@@ -24,6 +23,8 @@ const ExcelControls: React.FC<ExcelControlsProps> = ({ events, sharedCosts, setE
         const totalSpent = ownCostsTotal + sharedCostPerEvent;
         return {
             'Evento': event.name,
+            'Fecha Inicio': event.startDate,
+            'Fecha Termino': event.endDate,
             'Presupuesto Total': event.totalBudget,
             'Gasto Total': totalSpent,
             'Presupuesto Disponible': event.totalBudget - totalSpent
@@ -90,8 +91,23 @@ const ExcelControls: React.FC<ExcelControlsProps> = ({ events, sharedCosts, setE
         try {
             const data = event.target?.result;
             const workbook = XLSX.read(data, { type: 'array' });
+            
+            // 1. Rebuild events from Summary sheet
+            const summarySheet = workbook.Sheets['Resumen'];
+            if (!summarySheet) {
+              throw new Error("La hoja 'Resumen' es obligatoria para la importación, ya que define los eventos y sus presupuestos.");
+            }
+            const summaryData: any[] = XLSX.utils.sheet_to_json(summarySheet);
 
-            const newEventsData = events.map(event => ({ ...event, costItems: [], tasks: [] }));
+            const newEventsData: EventData[] = summaryData.map((row: any, index: number) => ({
+                id: `imported-${Date.now()}-${index}`,
+                name: row['Evento'] || `Evento Importado ${index + 1}`,
+                startDate: row['Fecha Inicio'] || '',
+                endDate: row['Fecha Termino'] || '',
+                totalBudget: typeof row['Presupuesto Total'] === 'number' ? row['Presupuesto Total'] : 0,
+                costItems: [],
+                tasks: [],
+            }));
 
             // Process Shared Costs
             const sharedSheet = workbook.Sheets['Costos Compartidos'];

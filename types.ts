@@ -1,22 +1,24 @@
-
 export interface CostItem {
   id: string;
   description: string;
   amount: number;
+  isVariable?: boolean;
 }
 
 export interface Task {
   id: string;
   description: string;
-  dueDate: string; // YYYY-MM-DD format
+  dueDate: string;
   isComplete: boolean;
 }
 
 export interface EventData {
-  id: string;
+  id:string;
   name: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   totalBudget: number;
+  attendees: number;
   costItems: CostItem[];
   tasks: Task[];
 }
